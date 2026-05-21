@@ -51,6 +51,10 @@ Add this repository as a plugin marketplace in your VS Code settings:
 
 Then open the Extensions view, search for `@agentPlugins`, and install `connxio` from the `connxio-plugins` marketplace.
 
+### Update plugin
+
+Open the command palette and run `Extensions: Check for Extension Updates` to check for updates to marketplace plugins.
+
 ### Local plugin install
 
 For local development, register the plugin directory directly:
