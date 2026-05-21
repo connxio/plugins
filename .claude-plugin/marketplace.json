@@ -1,0 +1,23 @@
+{
+  "name": "connxio-plugins",
+  "owner": {
+    "name": "Connxio"
+  },
+  "metadata": {
+    "description": "Connxio agent plugins for VS Code, Claude Code, and GitHub Copilot tooling.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "connxio",
+      "source": "./plugins/connxio",
+      "description": "Registers the Connxio CLI MCP server and starter Connxio guidance.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Connxio"
+      },
+      "homepage": "https://github.com/connxio/plugins",
+      "repository": "https://github.com/connxio/plugins"
+    }
+  ]
+}

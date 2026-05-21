@@ -1,0 +1,18 @@
+{
+  "name": "connxio",
+  "description": "Registers the Connxio CLI MCP server and starter Connxio guidance.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Connxio"
+  },
+  "homepage": "https://github.com/connxio/plugins",
+  "repository": "https://github.com/connxio/plugins",
+  "keywords": [
+    "connxio",
+    "mcp",
+    "vscode",
+    "claude-code",
+    "copilot"
+  ],
+  "mcpServers": "./.mcp.json"
+}

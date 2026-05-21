@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "connxio": {
+      "command": "connxio",
+      "args": [
+        "mcp",
+        "serve"
+      ]
+    }
+  }
+}
