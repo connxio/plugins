@@ -2,9 +2,7 @@
 
 Connxio agent plugins for VS Code, Claude Code, and GitHub Copilot tooling.
 
-This repository is a plugin marketplace with one installable plugin today:
-
-- `connxio`: registers the Connxio CLI MCP server with `connxio mcp serve` and includes a starter Connxio skill.
+- `connxio`: registers the Connxio CLI MCP server with `connxio mcp serve` and includes Connxio skills.
 
 ## Install Connxio CLI First
 
@@ -47,9 +45,7 @@ Add this repository as a plugin marketplace in your VS Code settings:
 
 ```json
 {
-  "chat.plugins.marketplaces": [
-    "connxio/plugins"
-  ]
+  "chat.plugins.marketplaces": ["connxio/plugins"]
 }
 ```
 
@@ -108,13 +104,9 @@ copilot plugin install connxio@connxio-plugins
 copilot plugin install ./plugins/connxio
 ```
 
-## Included Skill
+## Skills
 
-The plugin ships one starter skill:
-
-- `connxio-guide`: example guidance for using the Connxio MCP tools safely and effectively.
-
-You can add more skills later under `plugins/connxio/skills/`.
+Add skills under `plugins/connxio/skills/`.
 
 ## Troubleshooting
 
