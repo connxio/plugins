@@ -12,7 +12,6 @@
       "name": "connxio",
       "source": "./plugins/connxio",
       "description": "Registers the Connxio CLI MCP server skills.",
-      "version": "0.1.1",
       "author": {
         "name": "Connxio"
       },
