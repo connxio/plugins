@@ -1,16 +1,15 @@
 ---
-name: upload-code-component
-description: "Deploy a .NET Connxio code component (mapper/splitter) to a Connxio environment. Use when uploading a new component version, building and packaging a DLL or ZIP, publishing a code component, or updating integrations to the new version."
+name: connxio-code-component
+description: "Upload a .NET Connxio code component (mapper/splitter) to a Connxio environment. Use when uploading a new component version, building and packaging a DLL or ZIP, publishing a code component, or updating integrations to the new version."
 argument-hint: "Component project name and target environment"
 ---
 
-# Deploy Connxio Code Component
+# Upload Connxio Code Component
 
 ## When to Use
 
-- User wants to upload/deploy/publish a mapper or splitter to Connxio
-- User says "upload new code component", "deploy to connxio", "publish updated mapper"
-- After code changes to a component project under `src/`
+- User wants to upload/deploy/publish a map, split, batch or ack code component to Connxio
+- User says "upload new code component", "update code component", "deploy to connxio", "publish updated mapper"
 
 ## MCP Server Selection
 
