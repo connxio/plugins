@@ -98,6 +98,51 @@ const response = typeof raw === "string" ? JSON.parse(raw) : raw;
   the integration definition or the properties the user gave you) and copy
   it verbatim — do not type it from memory.
 
+### Reading or writing user-defined properties (`userDefinedProperties`)
+
+Scripts commonly read or set flags/values on
+`event.metadata.userDefinedProperties.<PropertyName>` (e.g. `isUpdate`,
+`customerId`), which conditions on later steps then reference via
+`'{userdefinedproperties:<PropertyName>}'`.
+
+- **`userDefinedProperties` must be spelled exactly like this** (camelCase) —
+  do not write `UserDefinedProperties`, `userdefinedproperties`, or any other
+  casing when accessing it from script code (`event.metadata.userDefinedProperties`).
+- Note the case difference between the two contexts: in script code the
+  object is `event.metadata.userDefinedProperties` (camelCase), but in a
+  transformation's `condition.expression` string the placeholder syntax is
+  **all lowercase**: `'{userdefinedproperties:isUpdate}'`. Do not mix these
+  up (e.g. do not write `{userDefinedProperties:isUpdate}` in a condition
+  expression, and do not write `event.metadata.userdefinedproperties` in a
+  script).
+- **`<PropertyName>` must exactly match (including case) across every place
+  it's used**: the script that sets it, any other script that reads it, and
+  every condition expression that checks it. If a script sets
+  `event.metadata.userDefinedProperties.isUpdate`, every condition must read
+  `{userdefinedproperties:isUpdate}` — not `{userdefinedproperties:IsUpdate}`
+  or `{userdefinedproperties:is_update}`.
+- Always guard for the object existing before writing to it, since it may be
+  undefined on the first script in a chain:
+
+```js
+if (!event.metadata) {
+  event.metadata = {};
+}
+if (!event.metadata.userDefinedProperties) {
+  event.metadata.userDefinedProperties = {};
+}
+event.metadata.userDefinedProperties.isUpdate = hasExternalId ? "true" : "false";
+```
+
+- User-defined properties are always strings. When setting a flag, use the
+  literal strings `"true"`/`"false"` (not JavaScript booleans), since
+  condition expressions compare them as strings (e.g.
+  `'{userdefinedproperties:isUpdate}' == 'false'`).
+- Before writing a script that reads or sets a `userDefinedProperties` key
+  that's already used elsewhere in the same integration, locate the exact
+  property name from the existing script/condition and copy it verbatim —
+  do not type it from memory or guess a variant spelling.
+
 ## Response preference
 
 - Default to returning only the script code unless the user asks for explanation.
@@ -114,3 +159,7 @@ const response = typeof raw === "string" ? JSON.parse(raw) : raw;
 - If the script reads `event.metadata.dataCollection.<VariableName>`, does
   `<VariableName>` exactly match (including case) the `VariableName` of the
   step that produces it, and is `dataCollection` spelled/cased correctly?
+- If the script reads or sets `event.metadata.userDefinedProperties.<PropertyName>`,
+  is `userDefinedProperties` spelled/cased correctly, and does `<PropertyName>`
+  exactly match every other place it's used (other scripts, and
+  `{userdefinedproperties:<PropertyName>}` in condition expressions)?
