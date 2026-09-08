@@ -69,6 +69,35 @@ If the transformation needs a package, use a pinned ESM import, for example:
 import { XMLParser } from "fast-xml-parser@5.3.4";
 ```
 
+### Reading another step's captured response (`dataCollection`)
+
+When a script needs to read the response captured by an earlier REST (or
+other) step in the same integration, it is available at
+`event.metadata.dataCollection.<VariableName>`, where `<VariableName>` is the
+exact `VariableName` configured on that earlier step's properties.
+
+- **`dataCollection` must be spelled exactly like this** (lowercase `d`,
+  camelCase) — do not write `dataCollection` with different casing (e.g.
+  `DataCollection`, `datacollection`), and do not guess an alternative
+  property name.
+- **The key under `dataCollection` must exactly match the producing step's
+  `VariableName`**, including case. If the REST step's properties have
+  `"VariableName": "customerCreateResponse"`, the script must read
+  `event.metadata.dataCollection.customerCreateResponse` — not a
+  re-typed/paraphrased version of that name.
+- The captured value may already be an object, or may be a JSON-encoded
+  string depending on the adapter — always defensively parse it:
+
+```js
+const raw = event.metadata.dataCollection.customerCreateResponse;
+const response = typeof raw === "string" ? JSON.parse(raw) : raw;
+```
+
+- Before writing a script that reads `dataCollection`, locate the exact
+  `VariableName` string from the step that produces it (e.g. by inspecting
+  the integration definition or the properties the user gave you) and copy
+  it verbatim — do not type it from memory.
+
 ## Response preference
 
 - Default to returning only the script code unless the user asks for explanation.
@@ -82,3 +111,6 @@ import { XMLParser } from "fast-xml-parser@5.3.4";
 - Is `event.content` read and updated correctly?
 - Are imports version-pinned?
 - Is the script valid JavaScript?
+- If the script reads `event.metadata.dataCollection.<VariableName>`, does
+  `<VariableName>` exactly match (including case) the `VariableName` of the
+  step that produces it, and is `dataCollection` spelled/cased correctly?
