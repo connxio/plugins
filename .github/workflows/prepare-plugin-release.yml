@@ -1,0 +1,100 @@
+name: Prepare plugin release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/connxio/skills/**'
+      - 'plugins/connxio/.mcp.json'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment (ignored when an exact version is supplied)
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+        required: true
+      exact_version:
+        description: Optional exact stable version, e.g. 0.1.8
+        type: string
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: prepare-connxio-plugin-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_BRANCH: release/connxio-version
+    steps:
+      - name: Require main
+        env:
+          DISPATCH_REF: ${{ github.ref }}
+        run: |
+          if [[ "$DISPATCH_REF" != refs/heads/main ]]; then
+            echo "::error::Run this workflow from main."
+            exit 1
+          fi
+
+      - name: Find existing release PR
+        id: existing
+        run: |
+          url=$(gh pr list --state open --head "$RELEASE_BRANCH" --base main --json url --jq '.[0].url // empty')
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          if [[ -n "$url" ]]; then
+            echo "Existing release PR: $url" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.existing.outputs.url == '' || github.event_name == 'workflow_dispatch'
+        with:
+          ref: main
+
+      - name: Bump plugin version
+        if: steps.existing.outputs.url == '' || github.event_name == 'workflow_dispatch'
+        id: version
+        env:
+          BUMP: ${{ inputs.bump || 'patch' }}
+          EXACT_VERSION: ${{ inputs.exact_version }}
+        run: python3 .github/scripts/bump-plugin-version.py "$BUMP" "$EXACT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update release PR
+        if: steps.existing.outputs.url == '' || github.event_name == 'workflow_dispatch'
+        env:
+          OLD_VERSION: ${{ steps.version.outputs.old_version }}
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
+          BUMP: ${{ inputs.bump || 'patch' }}
+          EXACT_VERSION: ${{ inputs.exact_version }}
+          EXISTING_PR: ${{ steps.existing.outputs.url }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git switch -c "$RELEASE_BRANCH"
+          git add plugins/connxio/.claude-plugin/plugin.json
+          git commit -m "chore: release connxio v$NEW_VERSION"
+          previous=$(git ls-remote --heads origin "refs/heads/$RELEASE_BRANCH" | cut -f1)
+          git push --force-with-lease="refs/heads/$RELEASE_BRANCH:$previous" origin "HEAD:refs/heads/$RELEASE_BRANCH"
+          body="$RUNNER_TEMP/plugin-release-body.md"
+          cat > "$body" <<EOF
+          Prepare the Connxio plugin release: **$OLD_VERSION → $NEW_VERSION**.
+
+          Selected bump: $BUMP
+          Exact version override: ${EXACT_VERSION:-none}
+
+          This PR changes only the plugin manifest version. Review and merge it to make the accumulated changes available as a new plugin version.
+          EOF
+          if [[ -n "$EXISTING_PR" ]]; then
+            gh pr edit "$EXISTING_PR" --title "chore: release connxio v$NEW_VERSION" --body-file "$body"
+            url="$EXISTING_PR"
+          else
+            url=$(gh pr create --base main --head "$RELEASE_BRANCH" --title "chore: release connxio v$NEW_VERSION" --body-file "$body")
+          fi
+          echo "Release PR: $url" >> "$GITHUB_STEP_SUMMARY"

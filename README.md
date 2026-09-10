@@ -112,6 +112,38 @@ copilot plugin install ./plugins/connxio
 
 Add skills under `plugins/connxio/skills/`.
 
+## Releasing the plugin
+
+Do not bump the plugin version in ordinary PRs. Changes merged into `main` under
+`plugins/connxio/skills/` or to `plugins/connxio/.mcp.json` automatically open a
+patch release PR. Further changes leave that PR and its version unchanged,
+including when a maintainer has selected a minor or major release.
+
+To choose a version manually, open **Actions → Prepare plugin release → Run
+workflow**, select **main**, and choose **patch**, **minor**, or **major**. An
+optional exact stable `X.Y.Z` version overrides the selection and must exceed the
+version on `main`. Minor and major increments reset lower components.
+
+Manual runs open a release PR or update the existing one from the latest `main`.
+The version is always calculated from `main`, so repeated runs do not compound
+the bump. A manual patch selection can replace a pending minor or major bump.
+Review and merge the PR when ready to release. Both triggers share one dedicated
+`release/connxio-version` branch; do not use it for other work. Neither trigger
+creates tags or GitHub Releases. The version-only merge does not trigger another
+automatic release PR.
+
+Before the first automatic release, manually select **0.1.8** as the exact version
+and merge that release PR: `0.1.7` previously appeared in repository history and
+should not be reused.
+
+Enable **Settings → Actions → General → Workflow permissions → Allow GitHub
+Actions to create and approve pull requests** (currently disabled in this repo).
+The workflow uses the built-in token and needs no additional secrets. Merge the
+workflow into `main` before using it.
+
+Marketplace metadata stays unchanged. The marketplace reads `main`, so fresh
+installs can include merged changes before a version bump.
+
 ## Troubleshooting
 
 - If `connxio` is not found, reinstall the CLI and verify `connxio --help` works in your shell.
