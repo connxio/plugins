@@ -4,18 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'plugins/connxio/skills/**'
-      - 'plugins/connxio/.mcp.json'
+      - "plugins/connxio/skills/**"
+      - "plugins/connxio/.mcp.json"
   workflow_dispatch:
     inputs:
       bump:
-        description: Version increment (ignored when an exact version is supplied)
+        description: Version increment
         type: choice
         options: [patch, minor, major]
         default: patch
         required: true
       exact_version:
-        description: Optional exact stable version, e.g. 0.1.8
+        description: Optional exact stable version
         type: string
         required: false
 
